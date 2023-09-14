@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::Read;
 use std::path::PathBuf;
 use std::process::{Command, Output};
 
@@ -270,4 +272,18 @@ fn contains10<T: PartialEq>(v: &Vec<T>, c: T) -> char {
     } else {
         '0'
     }
+}
+
+pub fn load_config(path: &PathBuf) -> AppConfig {
+    let mut file = File::open(path).expect("catch later file open");
+    let mut s = String::new();
+    file.read_to_string(&mut s)
+        .expect("catch later file reading to string");
+    ron::from_str::<AppConfig>(&s).expect("catch later ron_file to AppConfig")
+}
+
+#[test]
+fn test_printexample() {
+    let conf = load_config(&PathBuf::from("example.ron"));
+    println!("{:#?}", conf);
 }
