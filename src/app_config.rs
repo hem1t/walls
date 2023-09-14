@@ -160,10 +160,12 @@ pub enum Query {
     ID(String),
 }
 
+pub use Query::*;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AppConfig {
     apikey: Option<String>,
-    query: Query,
+    pub query: Query,
     filters: Filter,
     seconds: Option<u32>,
     // Assuming Scripts takes a pathName to wall.
@@ -184,7 +186,7 @@ impl AppConfig {
         if let Some(s) = self.seconds {
             s
         } else {
-            0
+            60
         }
     }
 
