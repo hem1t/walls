@@ -274,7 +274,7 @@ fn contains10<T: PartialEq>(v: &Vec<T>, c: T) -> char {
     }
 }
 
-pub fn load_config(path: &PathBuf) -> AppConfig {
+pub fn load_config(path: &str) -> AppConfig {
     let mut file = File::open(path).expect("catch later file open");
     let mut s = String::new();
     file.read_to_string(&mut s)
@@ -284,6 +284,6 @@ pub fn load_config(path: &PathBuf) -> AppConfig {
 
 #[test]
 fn test_printexample() {
-    let conf = load_config(&PathBuf::from("example.ron"));
+    let conf = load_config("config.ron");
     println!("{:#?}", conf);
 }
