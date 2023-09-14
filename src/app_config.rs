@@ -1,4 +1,7 @@
+#![allow(dead_code)]
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
+use std::process::{Command, Output};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum Category {
@@ -24,8 +27,14 @@ pub enum Sorting {
     Toplist,
 }
 
+impl Default for Sorting {
+    fn default() -> Self {
+        Self::DateAdded
+    }
+}
+
 impl Sorting {
-    pub fn to_string(&self) -> &str {
+    pub fn to_str(&self) -> &str {
         match self {
             Sorting::DateAdded => "date_added",
             Sorting::Relevance => "relevance",
@@ -43,8 +52,14 @@ pub enum Order {
     Asc,
 }
 
+impl Default for Order {
+    fn default() -> Self {
+        Self::Desc
+    }
+}
+
 impl Order {
-    pub fn to_string(&self) -> &str {
+    pub fn to_str(&self) -> &str {
         match self {
             Order::Desc => "desc",
             Order::Asc => "asc",
@@ -63,8 +78,14 @@ pub enum TopRange {
     OneYear,
 }
 
+impl Default for TopRange {
+    fn default() -> Self {
+        Self::OneMonth
+    }
+}
+
 impl TopRange {
-    pub fn to_string(&self) -> &str {
+    pub fn to_str(&self) -> &str {
         match self {
             TopRange::OneDay => "1d",
             TopRange::ThreeDay => "3d",
@@ -117,46 +138,65 @@ impl Color {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct SearchURL {
-    query: String,
-    category: Vec<Category>,
-    purity: Vec<Purity>,
-    sort: Sorting,
-    order: Order,
-    top_range: TopRange,
-    atleast: String,
-    resolutions: Vec<String>,
-    ratios: Vec<String>,
-    colors: Vec<Color>,
-    page: u32,
+pub struct Filter {
+    categories: Option<Vec<Category>>,
+    purity: Option<Vec<Purity>>,
+    sorting: Option<Sorting>,
+    order: Option<Order>,
+    top_range: Option<TopRange>,
+    atleast: Option<String>,
+    resolutions: Option<Vec<String>>,
+    ratios: Option<Vec<String>>,
+    colors: Option<Vec<Color>>,
+    page: Option<u32>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Query {
-    Search(Box<SearchURL>),
-    Collection {
-        username: Box<String>,
-        id: Box<String>,
-    },
-    ID(Box<String>),
+    Search(String),
+    Collection { username: String, id: String },
+    ID(String),
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AppConfig {
     apikey: Option<String>,
-    username: Option<String>,
     query: Query,
+    filters: Filter,
     seconds: Option<u32>,
     // Assuming Scripts takes a pathName to wall.
     script: String,
 }
 
+impl AppConfig {
+    pub fn geturl(&self) -> String {
+        format!(
+            "{}?apikey={}&{}",
+            self.query.tourl(),
+            self.apikey.as_ref().unwrap_or(&String::new()),
+            self.filters.tourl()
+        )
+    }
+
+    pub fn time(&self) -> u32 {
+        if let Some(s) = self.seconds {
+            s
+        } else {
+            0
+        }
+    }
+
+    pub fn set_wall(&self, path: PathBuf) -> std::io::Result<Output> {
+        Command::new(format!("{} {}", self.script, path.to_string_lossy())).output()
+    }
+}
+
 impl Query {
-    pub fn tourl(self) -> String {
+    pub fn tourl(&self) -> String {
         match self {
             Query::ID(id) => format!("https://wallhaven.cc/api/v1/w/{}", id),
             Query::Search(search) => {
-                format!("https://wallhaven.cc/api/v1/search?{}", search.tourl())
+                format!("https://wallhaven.cc/api/v1/search?{}", search)
             }
             Query::Collection { username, id } => format!(
                 "https://wallhaven.cc/api/v1/collections/{}/{}",
@@ -166,62 +206,68 @@ impl Query {
     }
 }
 
-impl SearchURL {
-    pub fn tourl(self) -> String {
-        format!("q={}&categories={}&purity={}&sorting={}&order={}&topRange={}&atleast={}&resolutions={}&ratios={}&colors={}&page={}",
-                self.query,
+impl Filter {
+    pub fn tourl(&self) -> String {
+        format!("categories={}&purity={}&sorting={}&order={}&topRange={}&atleast={}&resolutions={}&ratios={}&colors={}&page={}",
                 self.category_str(),
                 self.purity_str(),
-                self.sort.to_string(),
-                self.order.to_string(),
-                self.top_range.to_string(),
-                self.atleast,
+                self.sorting.as_ref().unwrap_or(&Sorting::DateAdded).to_str(),
+                self.order.as_ref().unwrap_or(&Order::Desc).to_str(),
+                self.top_range.as_ref().unwrap_or(&TopRange::OneMonth).to_str(),
+                self.atleast.as_ref().unwrap_or(&String::from("")),
                 self.resolutions_str(),
                 self.ratios_str(),
                 self.color_str(),
-                self.page
+                self.page.unwrap_or_default()
         )
     }
 
     pub fn category_str(&self) -> String {
         let mut s = String::with_capacity(3);
-        let category = |c: Category| {
-            if self.category.contains(&c) {
-                '1'
-            } else {
-                '0'
-            }
-        };
-        s.push(category(Category::General));
-        s.push(category(Category::Anime));
-        s.push(category(Category::People));
+        if let Some(c) = &self.categories {
+            s.push(contains10(&c, Category::General));
+            s.push(contains10(&c, Category::Anime));
+            s.push(contains10(&c, Category::People));
+        } else {
+            s = String::from("111")
+        }
         s
     }
 
     pub fn purity_str(&self) -> String {
         let mut s = String::with_capacity(3);
-        let purity = |c: Purity| {
-            if self.purity.contains(&c) {
-                '1'
-            } else {
-                '0'
-            }
-        };
-        s.push(purity(Purity::SFW));
-        s.push(purity(Purity::Sketchy));
-        s.push(purity(Purity::NSFW));
+        if let Some(p) = &self.purity {
+            s.push(contains10(&p, Purity::SFW));
+            s.push(contains10(&p, Purity::Sketchy));
+            s.push(contains10(&p, Purity::NSFW));
+        } else {
+            s = String::from("100")
+        }
         s
     }
 
     pub fn resolutions_str(&self) -> String {
-        self.resolutions.join(",")
+        (self.resolutions.as_ref().unwrap_or(&vec![])).join(",")
     }
 
     pub fn ratios_str(&self) -> String {
-        self.ratios.join(",")
+        (self.ratios.as_ref().unwrap_or(&vec![])).join(",")
     }
 
     pub fn color_str(&self) -> String {
-        self.colors.iter().map(|c| c.to_str()).collect::<String>()
+        self.colors
+            .as_ref()
+            .unwrap_or(&vec![])
+            .iter()
+            .map(|c| c.to_str())
+            .collect::<String>()
+    }
+}
+
+fn contains10<T: PartialEq>(v: &Vec<T>, c: T) -> char {
+    if v.contains(&c) {
+        '1'
+    } else {
+        '0'
     }
 }
