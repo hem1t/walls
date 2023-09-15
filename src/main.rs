@@ -4,6 +4,7 @@ mod wallhaven;
 use std::process::exit;
 
 use app_config::*;
+use wallhaven::make_request;
 
 fn main() {
     let config = load_config("");
@@ -19,6 +20,13 @@ fn main() {
         ID(..) => {
             // TODO: load wall from API and set it as a wall, if not already.
             let url = config.geturl();
+            if let Ok(data) = make_request(url) {
+                if data.data.is_empty() {
+                    eprintln!("Data for ID not Found");
+                    exit(1);
+                }
+                config.run_script(&data.data[0].path).unwrap();
+            }
             exit(0);
         }
     }
