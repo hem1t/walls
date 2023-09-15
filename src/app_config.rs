@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};
-use std::fs::File;
+use std::ffi::OsStr;
+use std::fs::{self, File};
 use std::io::Read;
 use std::path::PathBuf;
 use std::process::{Command, Output};
@@ -190,8 +191,19 @@ impl AppConfig {
         }
     }
 
-    pub fn run_script(&self, path: &String) -> std::io::Result<Output> {
-        Command::new(format!("{} {}", self.script, path)).output()
+    pub fn run_script(&self, path: &String) {
+        let path = PathBuf::from(path).canonicalize().unwrap();
+        println!(
+            "Setting wall with: {} {}",
+            &self.script,
+            &path.to_string_lossy().to_string()
+        );
+        let script = self.script.split_ascii_whitespace().collect::<Vec<&str>>();
+        Command::new(script[0])
+            .args(script.get(1..).unwrap())
+            .arg(path.to_string_lossy().to_string())
+            .spawn()
+            .expect("catch later");
     }
 }
 
@@ -222,7 +234,7 @@ impl Filter {
                 self.resolutions_str(),
                 self.ratios_str(),
                 self.color_str(),
-                self.page.unwrap_or_default()
+                self.page.unwrap_or(1)
         )
     }
 

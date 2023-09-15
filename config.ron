@@ -16,19 +16,19 @@
 
     filters: (
         //[General, Anime, People]
-        categories: Some([General, Anime, People]),
+        categories: Some([General, Anime]),
 
         //[SFW, Sketchy, NSFW]
         purity: Some([SFW]),
 
         // DateAdded, Relevance, Random, Views, Favorites, Toplist
-        sorting: Some(DateAdded),
+        //sorting: Some(DateAdded),
 
         // Desc, Asc
-        order: Some(Desc),
+        //order: Some(Desc),
 
         // OneDay, ThreeDay, OneWeek, OneMonth, ThreeMonth, SixMonth, OneYear
-        top_range: Some(OneMonth),
+        //top_range: Some(OneMonth),
 
         // provide minimum resolution
         atleast: Some( "1920x1080"),
@@ -42,16 +42,16 @@
         // For this write your color with preceding "H"
         // Case sensitive
         // like Hffcc33,
-        colors: Some([ H663300, Hcc6633 ]),
+        //colors: Some([ H663300, Hcc6633 ]),
 
         // For some reason if you need to specify page
         page: Some(1)
     ),
 
     // time to load new wallpaper.
-    seconds: Some(60),
+    seconds: Some(5),
 
     // script to run to set wallpaper
     // assuming script takes wallpaper's path as last argument
-    script: "nitrogen --save --set-centered"
+    script: "/usr/bin/nitrogen --save --set-centered"
 )

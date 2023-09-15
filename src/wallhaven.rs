@@ -29,10 +29,13 @@ pub fn make_request(url: &String) -> Result<Data, Error> {
 }
 
 pub fn get_image(url: &String) -> Result<String, Error> {
-    let path = format!("./walls/{}", url.get((url.len() - 10)..).unwrap());
+    let path = format!(".walls/{}", url.get((url.len() - 10)..).unwrap());
+    println!("Path creating: {}", path);
     if let Ok(mut file) = File::create(path.clone()) {
+        println!("Path created: {}", path);
         let image = get(url)?.bytes()?;
         file.write_all(&image).unwrap();
     }
+    println!("Returning path: {}", path);
     Ok(path)
 }
