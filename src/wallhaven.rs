@@ -24,11 +24,11 @@ pub struct Data {
     pub meta: Meta,
 }
 
-pub fn make_request(url: String) -> Result<Data, Error> {
+pub fn make_request(url: &String) -> Result<Data, Error> {
     Ok(get(url)?.json::<Data>()?)
 }
 
-pub fn get_image(url: String) -> Result<String, Error> {
+pub fn get_image(url: &String) -> Result<String, Error> {
     let path = format!("./walls/{}", url.get((url.len() - 10)..).unwrap());
     if let Ok(mut file) = File::create(path.clone()) {
         let image = get(url)?.bytes()?;
