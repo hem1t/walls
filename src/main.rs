@@ -1,4 +1,5 @@
 mod app_config;
+mod wallhaven;
 
 use std::process::exit;
 
