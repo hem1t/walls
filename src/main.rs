@@ -1,5 +1,7 @@
 mod app_config;
 
+use std::process::exit;
+
 use app_config::*;
 
 fn main() {
@@ -9,10 +11,14 @@ fn main() {
             // TODO: loop should pause for seconds and change walls.
             let url = config.geturl();
         },
-        Search(..) | Collection { .. } => panic!("Time cannot be 0 or less!"),
+        Search(..) | Collection { .. } => {
+            eprintln!("Time cannot be 0 or less!");
+            exit(1);
+        }
         ID(..) => {
             // TODO: load wall from API and set it as a wall, if not already.
             let url = config.geturl();
+            exit(0);
         }
     }
 }
