@@ -4,7 +4,7 @@
 
     // ID: You can find in the links of favorites
     // Ex: https://wallhaven.cc/favorites/1528239
-    // query: Collection( username: "hem1t", id: "1528239" )
+    // query: Collection( username: "hem1t", id: "1528239" ),
 
     // OR you can ask for specific wall
     // Ex: to request wall https://wallhaven.cc/w/p9we73
@@ -12,17 +12,17 @@
 
     // OR you can create Query according to
     // https://wallhaven.cc/help/api#search
-    query: Search("Landscapes"),
+    query: Search("Leaves rain"),
 
     filters: (
         //[General, Anime, People]
-        categories: Some([General, Anime]),
+        categories: Some([General, Anime, People]),
 
         //[SFW, Sketchy, NSFW]
         purity: Some([SFW]),
 
         // DateAdded, Relevance, Random, Views, Favorites, Toplist
-        //sorting: Some(DateAdded),
+        sorting: Some(Random),
 
         // Desc, Asc
         //order: Some(Desc),
@@ -42,14 +42,14 @@
         // For this write your color with preceding "H"
         // Case sensitive
         // like Hffcc33,
-        //colors: Some([ H663300, Hcc6633 ]),
+        colors: Some([ H336600, H669900 ]),
 
         // For some reason if you need to specify page
         page: Some(1)
     ),
 
     // time to load new wallpaper.
-    seconds: Some(5),
+    seconds: Some(60),
 
     // script to run to set wallpaper
     // assuming script takes wallpaper's path as last argument

@@ -136,7 +136,37 @@ pub enum Color {
 
 impl Color {
     pub fn to_str(&self) -> &str {
-        stringify!(self)
+        match self {
+            Color::H660000 => "660000",
+            Color::H990000 => "990000",
+            Color::Hcc0000 => "cc0000",
+            Color::Hcc3333 => "cc3333",
+            Color::Hea4c88 => "ea4c88",
+            Color::H993399 => "993399",
+            Color::H663399 => "663399",
+            Color::H333399 => "333399",
+            Color::H0066cc => "0066cc",
+            Color::H0099cc => "0099cc",
+            Color::H66cccc => "66cccc",
+            Color::H77cc33 => "77cc33",
+            Color::H669900 => "669900",
+            Color::H336600 => "336600",
+            Color::H666600 => "666600",
+            Color::H999900 => "999900",
+            Color::Hcccc33 => "cccc33",
+            Color::Hffff00 => "ffff00",
+            Color::Hffcc33 => "ffcc33",
+            Color::Hff9900 => "ff9900",
+            Color::Hff6600 => "ff6600",
+            Color::Hcc6633 => "cc6633",
+            Color::H996633 => "996633",
+            Color::H663300 => "663300",
+            Color::H000000 => "000000",
+            Color::H999999 => "999999",
+            Color::Hcccccc => "cccccc",
+            Color::Hffffff => "ffffff",
+            Color::H424153 => "424153",
+        }
     }
 }
 
@@ -276,7 +306,8 @@ impl Filter {
             .unwrap_or(&vec![])
             .iter()
             .map(|c| c.to_str())
-            .collect::<String>()
+            .collect::<Vec<&str>>()
+            .join(",")
     }
 
     pub fn inc_page(&mut self) {
