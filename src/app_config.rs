@@ -190,8 +190,8 @@ impl AppConfig {
         }
     }
 
-    pub fn set_wall(&self, path: PathBuf) -> std::io::Result<Output> {
-        Command::new(format!("{} {}", self.script, path.to_string_lossy())).output()
+    pub fn run_script(&self, path: &String) -> std::io::Result<Output> {
+        Command::new(format!("{} {}", self.script, path)).output()
     }
 }
 
