@@ -7,7 +7,7 @@ use app_config::*;
 use wallhaven::{get_image, make_request};
 
 fn main() {
-    let config = load_config("");
+    let mut config = load_config("");
     match config.query {
         Search(..) | Collection { .. } if config.time() > 0 => loop {
             // TODO: loop should pause for seconds and change walls.
@@ -17,6 +17,10 @@ fn main() {
                     eprintln!("Not Found any image for the config!");
                     exit(1);
                 }
+                for img in data.data {
+                    config.run_script(&get_image(&img.path).unwrap()).unwrap();
+                }
+                config.filters.inc_page();
             }
         },
         Search(..) | Collection { .. } => {

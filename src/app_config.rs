@@ -166,7 +166,7 @@ pub use Query::*;
 pub struct AppConfig {
     apikey: Option<String>,
     pub query: Query,
-    filters: Filter,
+    pub filters: Filter,
     seconds: Option<u32>,
     // Assuming Scripts takes a pathName to wall.
     script: String,
@@ -265,6 +265,10 @@ impl Filter {
             .iter()
             .map(|c| c.to_str())
             .collect::<String>()
+    }
+
+    pub fn inc_page(&mut self) {
+        self.page = Some(self.page.unwrap() + 1);
     }
 }
 
