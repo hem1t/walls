@@ -1,7 +1,7 @@
 mod app_config;
 mod wallhaven;
 
-use std::process::exit;
+use std::{process::exit, thread, time::Duration};
 
 use app_config::*;
 use wallhaven::{get_image, make_request};
@@ -21,6 +21,7 @@ fn main() {
                     config.run_script(&get_image(&img.path).unwrap()).unwrap();
                 }
                 config.filters.inc_page();
+                thread::sleep(Duration::from_secs(config.time().into()));
             }
         },
         Search(..) | Collection { .. } => {
